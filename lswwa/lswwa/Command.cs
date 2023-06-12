@@ -210,7 +210,7 @@ namespace lswwa
                     {
                         Assembly a = Assembly.Load(arg); // Загружаем библиотеку
                         Object o = a.CreateInstance("Program"); // Получаем классы
-                        Type t = a.GetType("testdll.Program"); // Получаем класс
+                        Type t = a.GetType(arg + ".Program"); // Получаем класс
                         MethodInfo mi = t.GetMethod("Do"); // Получаем метод
                         libs.Add(arg, new object[] { o, mi });
                     }

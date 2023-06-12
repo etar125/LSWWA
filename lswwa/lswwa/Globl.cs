@@ -9,7 +9,7 @@ namespace lswwa
     {
         public static int Version = 0; // Основная версия
         public static int SubVersion = 5; // Дополнительная версия
-        public static int Build = 116231527; // Версия сборки: ДЕНЬ-МЕСЯЦ-ГОД-час-время~
+        public static int Build = 116231551; // Версия сборки: ДЕНЬ-МЕСЯЦ-ГОД-час-время~
 
         public static string ConvertS(string text)
         {
