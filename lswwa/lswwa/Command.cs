@@ -122,9 +122,7 @@ namespace lswwa
             {
                 string[] splt = Globl.SplitByFirst(arg, ' ');
                 string arr = splt[0];
-                string[] splt2 = Globl.SplitByFirst(splt[1], ' ');
-                int index = int.Parse(splt2[0]);
-                string var = splt2[1];
+                string var = splt[1];
                 if (Program.arrs.ContainsKey(arr))
                 {
                     if (Program.vars.ContainsKey(var))
@@ -138,17 +136,12 @@ namespace lswwa
             else if (func == "len")
             {
                 string[] splt = Globl.SplitByFirst(arg, ' ');
-                string var1 = splt[0];
+                string var1 = Globl.ConvertS(splt[0]);
                 string var2 = splt[1];
-                if (Program.vars.ContainsKey(var1))
-                {
-                    if (Program.vars.ContainsKey(var2))
-                        Program.vars[var2] = "" + Program.vars[var1].Length;
-                    else
-                        throw new Exception("Not found variable " + var2);
-                }
+                if (Program.vars.ContainsKey(var2))
+                    Program.vars[var2] = "" + Program.vars[var1].Length;
                 else
-                    throw new Exception("Not found variable " + var1);
+                    throw new Exception("Not found variable " + var2);
             }
             else if (func == "remc")
             {
