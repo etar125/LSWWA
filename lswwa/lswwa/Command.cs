@@ -320,13 +320,16 @@ namespace lswwa
 
             else if (func == "include")
             {
-                if (File.Exists(arg + ".dll"))
+                string[] sl = Globl.SplitByFirst(arg, ' ');
+                string dll = sl[0];
+                string name = sl[1];
+                if (File.Exists(dll + ".dll"))
                 {
-                    Assembly a = Assembly.Load(arg); // Загружаем библиотеку
+                    Assembly a = Assembly.Load(dll); // Загружаем библиотеку
                     Object o = a.CreateInstance("Program"); // Получаем классы
-                    Type t = a.GetType(arg + ".Program"); // Получаем класс
+                    Type t = a.GetType(name + ".Program"); // Получаем класс
                     MethodInfo mi = t.GetMethod("Do"); // Получаем метод
-                    libs.Add(arg, new object[] { o, mi });
+                    libs.Add(name, new object[] { o, mi });
                 }
                 else
                     throw new Exception("Not found file " + arg);
