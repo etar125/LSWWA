@@ -95,7 +95,7 @@ namespace lswwa
             {
                 string[] splt = Globl.SplitByFirst(arg, ' ');
                 if (Program.arrs.ContainsKey(splt[0]))
-                    Program.arrs[splt[0]].RemoveAt(int.Parse(splt[1]));
+                    Program.arrs[splt[0]].RemoveAt(int.Parse(Globl.ConvertS(splt[1])));
                 else
                     throw new Exception("Not found array " + splt[0]);
             }
@@ -111,7 +111,7 @@ namespace lswwa
                 string[] splt = Globl.SplitByFirst(arg, ' ');
                 string arr = splt[0];
                 string[] splt2 = Globl.SplitByFirst(splt[1], ' ');
-                int index = int.Parse(splt2[0]);
+                int index = int.Parse(Globl.ConvertS(splt2[0]));
                 string var = splt2[1];
                 if (Program.arrs.ContainsKey(arr))
                     Program.arrs[arr][index] = Globl.ConvertS(arg);
@@ -148,8 +148,8 @@ namespace lswwa
                 string[] splt = Globl.SplitByFirst(arg, ' ');
                 string var = splt[0];
                 string[] splt2 = Globl.SplitByFirst(splt[1], ' ');
-                int index = int.Parse(splt2[0]);
-                int len = int.Parse(splt2[1]);
+                int index = int.Parse(Globl.ConvertS(splt2[0]));
+                int len = int.Parse(Globl.ConvertS(splt2[1]));
                 if (Program.vars.ContainsKey(splt[0]))
                     Program.vars[var] = Program.vars[var].Remove(index, len);
                 else
@@ -160,8 +160,8 @@ namespace lswwa
                 string[] splt = Globl.SplitByFirst(arg, ' ');
                 string var = splt[0];
                 string[] splt2 = Globl.SplitByFirst(splt[1], ' ');
-                int index = int.Parse(splt2[0]);
-                int len = int.Parse(splt2[1]);
+                int index = int.Parse(Globl.ConvertS(splt2[0]));
+                int len = int.Parse(Globl.ConvertS(splt2[1]));
                 if (Program.vars.ContainsKey(splt[0]))
                     Program.vars[var] = Program.vars[var].Substring(index, len);
                 else
@@ -172,7 +172,7 @@ namespace lswwa
                 string[] splt = Globl.SplitByFirst(arg, ' ');
                 string arr = splt[0];
                 string[] splt2 = Globl.SplitByFirst(splt[1], ' ');
-                int index = int.Parse(splt2[0]);
+                int index = int.Parse(Globl.ConvertS(splt2[0]));
                 string var = splt2[1];
                 if (Program.arrs.ContainsKey(splt[0]))
                 {
