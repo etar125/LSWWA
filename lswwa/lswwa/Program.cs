@@ -60,8 +60,12 @@ namespace lswwa
 
                     for(index = 0; index < cod.Count; index++)
                     {
-                        string[] sl = Globl.SplitByFirst(cod[index], ' ');
-                        Command.Do(sl[0], sl[1]);
+                        //try
+                        //{
+                            string[] sl = Globl.SplitByFirst(cod[index], ' ');
+                            Command.Do(sl[0], sl[1]);
+                        //}
+                        //catch (Exception e) { Console.WriteLine("Line::" + index + "\nText::" + cod[index] + "\nError::" + e.Message); Console.ReadKey(true); Environment.Exit(0); }
                         //Console.WriteLine(sl[0] + "|" + sl[1]);
                     }
                 }

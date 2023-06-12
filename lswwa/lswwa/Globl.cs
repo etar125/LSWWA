@@ -8,8 +8,38 @@ namespace lswwa
     class Globl
     {
         public static int Version = 0; // Основная версия
-        public static int SubVersion = 1; // Дополнительная версия
-        public static int Build = 106231925; // Версия сборки: ДЕНЬ-МЕСЯЦ-ГОД-час-время~
+        public static int SubVersion = 5; // Дополнительная версия
+        public static int Build = 116231527; // Версия сборки: ДЕНЬ-МЕСЯЦ-ГОД-час-время~
+
+        public static string ConvertS(string text)
+        {
+            string das = "";
+            for (int ii = 0; ii < text.Length; ii++)
+            {
+                if (text[ii] == '%')
+                {
+                    for (int j = ii + 1; j < text.Length; j++)
+                    {
+                        if (text[j] == '%')
+                        {
+                            int startIndex = ii;
+                            int endIndex = j;
+                            int length = endIndex - startIndex;
+                            string var = text.Substring(startIndex + 1, length - 1);
+                            if (Program.vars.ContainsKey(var))
+                            {
+                                das += Program.vars[var];
+                            }
+                            ii = j;
+                            break;
+                        }
+                    }
+                }
+                else
+                    das += text[ii];
+            }
+            return das;
+        }
 
         public static string RemoveByLast(string text, char symbol)
         {
