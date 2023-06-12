@@ -17,21 +17,21 @@ namespace lswwa
             if (func == "print")
             {
                 if (Program.vars.ContainsKey(arg))
-                    Console.Write(Program.vars[arg]);
+                    Console.Write(Globl.ConvertS(arg));
                 else
                     throw new Exception("Not found variable " + arg);
             }
             else if (func == "println")
             {
                 if (Program.vars.ContainsKey(arg))
-                    Console.WriteLine(Program.vars[arg]);
+                    Console.WriteLine(Globl.ConvertS(arg));
                 else
                     throw new Exception("Not found variable " + arg);
             }
             else if (func == "title")
             {
                 if (Program.vars.ContainsKey(arg))
-                    Console.Title = Program.vars[arg];
+                    Console.Title = Globl.ConvertS(arg);
                 else
                     throw new Exception("Not found variable " + arg);
             }
@@ -195,13 +195,9 @@ namespace lswwa
             {
                 string[] spl = arg.Split(' ');
                 byte kn = byte.Parse(spl[0]);
-                string one = "";
-                string two = "";
+                string one = Globl.ConvertS(spl[1]);
+                string two = Globl.ConvertS(spl[3]);
                 string oper = spl[2];
-                if (Program.vars.ContainsKey(spl[1])) one = Program.vars[spl[1]];
-                else throw new Exception("Not found variable " + spl[1]);
-                if (Program.vars.ContainsKey(spl[3])) two = Program.vars[spl[3]];
-                else throw new Exception("Not found variable " + spl[3]);
                 switch (oper)
                 {
                     case "==":
