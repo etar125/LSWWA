@@ -15,6 +15,8 @@ namespace lswwa
         public static List<string> cod = new List<string> { };
         public static Dictionary<string, string> vars = new Dictionary<string, string> { };
         public static Dictionary<string, List<string>> arrs = new Dictionary<string, List<string>> { };
+        public static Exception ex = new Exception("no error");
+        public static bool intry = false;
         public static int index = 0;
 
         public static void Main(string[] args)
@@ -72,9 +74,20 @@ namespace lswwa
                     {
                         try
                         {
-                            if (!cod[index].StartsWith("endif "))
+                            if (!cod[index].StartsWith("endif ") && cod[index] != "end" && !cod[index].StartsWith(":") && cod[index] != "catch")
                             {
-                                if (cod[index].StartsWith("@"))
+                                if(cod[index] == "try")
+                                    intry = true;
+                                else if(cod[index] == "catch" && intry)
+                                {
+                                    intry = false;
+                                    int kk = Search(index, "end");
+                                    if (kk != -1)
+                                    {
+                                        index = kk;
+                                    }
+                                }
+                                else if (cod[index].StartsWith("@"))
                                 {
                                     try
                                     {
@@ -99,7 +112,23 @@ namespace lswwa
                                 }
                             }
                         }
-                        catch (Exception e) { Console.WriteLine("Line::" + index + "\nText::" + cod[index] + "\nError::" + e.Message); Console.ReadKey(true); Environment.Exit(0); }
+                        catch (Exception e)
+                        {
+                            if (!intry)
+                            {
+                                Console.WriteLine("Line::" + index + "\nText::" + cod[index] + "\nError::" + e.Message); Console.ReadKey(true); Environment.Exit(0);
+                            }
+                            else
+                            {
+                                ex = e;
+                                int kk = Search(index, "catch");
+                                if (kk != -1)
+                                {
+                                    index = kk;
+                                    intry = false;
+                                }
+                            }
+                        }
                         //Console.WriteLine(sl[0] + "|" + sl[1]);
                     }
                 }

@@ -15,30 +15,17 @@ namespace lswwa
         public static void Do(string func, string arg)
         {
             if (func == "print")
-            {
-                if (Program.vars.ContainsKey(arg))
-                    Console.Write(Globl.ConvertS(arg));
-                else
-                    throw new Exception("Not found variable " + arg);
-            }
+                Console.Write(Globl.ConvertS(arg));
             else if (func == "println")
-            {
-                if (Program.vars.ContainsKey(arg))
-                    Console.WriteLine(Globl.ConvertS(arg));
-                else
-                    throw new Exception("Not found variable " + arg);
-            }
+                Console.WriteLine(Globl.ConvertS(arg));
             else if (func == "title")
-            {
-                if (Program.vars.ContainsKey(arg))
-                    Console.Title = Globl.ConvertS(arg);
-                else
-                    throw new Exception("Not found variable " + arg);
-            }
+                Console.Title = Globl.ConvertS(arg);
             else if (func == "pause")
                 Console.ReadKey(true);
             else if (func == "clear")
-                Console.ReadKey(true);
+                Console.Clear();
+            else if (func == "exit")
+                Environment.Exit(0);
             else if (func == "foreground")
                 Console.ForegroundColor = Globl.ParseBy(arg);
             else if (func == "background")
@@ -50,6 +37,13 @@ namespace lswwa
                     Program.vars[arg] = text;
                 else
                     Program.vars.Add(arg, text);
+            }
+            else if (func == "eget")
+            {
+                if (Program.vars.ContainsKey(arg))
+                    Program.vars[arg] = Program.ex.Message;
+                else
+                    throw new Exception("Not found variable " + arg);
             }
             else if (func == "getkey")
             {
@@ -69,7 +63,7 @@ namespace lswwa
             }
             else if (func == "goto")
             {
-                int kk = Program.Search(0, arg + ":");
+                int kk = Program.Search(0, ":" + arg);
                 if (kk != -1)
                     Program.index = kk;
                 else
@@ -150,7 +144,7 @@ namespace lswwa
                 string[] splt2 = Globl.SplitByFirst(splt[1], ' ');
                 int index = int.Parse(Globl.ConvertS(splt2[0]));
                 int len = int.Parse(Globl.ConvertS(splt2[1]));
-                if (Program.vars.ContainsKey(splt[0]))
+                if (Program.vars.ContainsKey(var))
                     Program.vars[var] = Program.vars[var].Remove(index, len);
                 else
                     throw new Exception("Not found variable " + var);
@@ -162,7 +156,7 @@ namespace lswwa
                 string[] splt2 = Globl.SplitByFirst(splt[1], ' ');
                 int index = int.Parse(Globl.ConvertS(splt2[0]));
                 int len = int.Parse(Globl.ConvertS(splt2[1]));
-                if (Program.vars.ContainsKey(splt[0]))
+                if (Program.vars.ContainsKey(var))
                     Program.vars[var] = Program.vars[var].Substring(index, len);
                 else
                     throw new Exception("Not found variable " + var);
@@ -174,7 +168,7 @@ namespace lswwa
                 string[] splt2 = Globl.SplitByFirst(splt[1], ' ');
                 int index = int.Parse(Globl.ConvertS(splt2[0]));
                 string var = splt2[1];
-                if (Program.arrs.ContainsKey(splt[0]))
+                if (Program.arrs.ContainsKey(arr))
                 {
                     if (Program.vars.ContainsKey(var))
                         Program.vars[var] = Program.arrs[arr][index];
@@ -182,7 +176,7 @@ namespace lswwa
                         throw new Exception("Not found variable " + var);
                 }
                 else
-                    throw new Exception("Not found array " + splt[0]);
+                    throw new Exception("Not found array " + arr);
             }
             else if (func == "if")
             {
@@ -324,46 +318,47 @@ namespace lswwa
                 }
             }
 
-                else if (func == "include")
+            else if (func == "include")
+            {
+                if (File.Exists(arg + ".dll"))
                 {
-                    if (File.Exists(arg + ".dll"))
-                    {
-                        Assembly a = Assembly.Load(arg); // Загружаем библиотеку
-                        Object o = a.CreateInstance("Program"); // Получаем классы
-                        Type t = a.GetType(arg + ".Program"); // Получаем класс
-                        MethodInfo mi = t.GetMethod("Do"); // Получаем метод
-                        libs.Add(arg, new object[] { o, mi });
-                    }
-                    else
-                        throw new Exception("Not found file " + arg);
+                    Assembly a = Assembly.Load(arg); // Загружаем библиотеку
+                    Object o = a.CreateInstance("Program"); // Получаем классы
+                    Type t = a.GetType(arg + ".Program"); // Получаем класс
+                    MethodInfo mi = t.GetMethod("Do"); // Получаем метод
+                    libs.Add(arg, new object[] { o, mi });
                 }
+                else
+                    throw new Exception("Not found file " + arg);
+            }
 
+            else
+            {
+                if (!func.Contains("."))
+                    throw new Exception("Not found function " + func);
                 else
                 {
-                    if (!func.Contains("."))
-                        throw new Exception("Not found function " + func);
-                    else
+                    string[] ll = Globl.SplitByFirst(func, '.');
+                    if (libs.ContainsKey(ll[0]))
                     {
-                        string[] ll = Globl.SplitByFirst(func, '.');
-                        if (libs.ContainsKey(ll[0]))
+                        object[] objs = libs[ll[0]];
+                        object[] args =
                         {
-                            object[] objs = libs[ll[0]];
-                            object[] args =
-                            {
                                     ll[1],
                                     arg,
                                     Program.fil,
                                     Program.cod,
                                     Program.vars,
+                                    Program.arrs,
                                     Program.index,
                                     Globl.Version + "." + Globl.SubVersion + "." + Globl.Build
                                 };
-                            Object o = objs[0];
-                            MethodInfo mi = (MethodInfo)objs[1];
-                            mi.Invoke(o, args);
-                        }
-                        else
-                            throw new Exception("Not found library " + ll[0]);
+                        Object o = objs[0];
+                        MethodInfo mi = (MethodInfo)objs[1];
+                        mi.Invoke(o, args);
+                    }
+                    else
+                        throw new Exception("Not found library " + ll[0]);
                 }
             }
         }

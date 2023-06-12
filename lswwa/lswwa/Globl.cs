@@ -7,9 +7,9 @@ namespace lswwa
 {
     class Globl
     {
-        public static int Version = 0; // Основная версия
-        public static int SubVersion = 11; // Дополнительная версия
-        public static int Build = 126231736; // Версия сборки: ДЕНЬ-МЕСЯЦ-ГОД-час-время~
+        public static int Version = 1; // Основная версия
+        public static int SubVersion = 0; // Дополнительная версия
+        public static int Build = 126231845; // Версия сборки: ДЕНЬ-МЕСЯЦ-ГОД-час-время~
 
         public static string ConvertS(string text)
         {
