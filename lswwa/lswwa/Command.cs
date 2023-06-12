@@ -14,198 +14,329 @@ namespace lswwa
 
         public static void Do(string func, string arg)
         {
-            switch(func)
+            if (func == "print")
             {
-                case "print":
-                    if (Program.vars.ContainsKey(arg)) {
-                        Console.Write(Program.vars[arg]);
-                    }
-                    else {
-                        throw new Exception("Not found variable " + arg);
-                    }
-                    break;
-                case "pause":
-                    Console.ReadKey(true);
-                    break;
-                case "getline":
-                    string text = Console.ReadLine();
-                    if (Program.vars.ContainsKey(arg))
-                        Program.vars[arg] = text;
+                if (Program.vars.ContainsKey(arg))
+                    Console.Write(Program.vars[arg]);
+                else
+                    throw new Exception("Not found variable " + arg);
+            }
+            else if (func == "println")
+            {
+                if (Program.vars.ContainsKey(arg))
+                    Console.WriteLine(Program.vars[arg]);
+                else
+                    throw new Exception("Not found variable " + arg);
+            }
+            else if (func == "title")
+            {
+                if (Program.vars.ContainsKey(arg))
+                    Console.Title = Program.vars[arg];
+                else
+                    throw new Exception("Not found variable " + arg);
+            }
+            else if (func == "pause")
+                Console.ReadKey(true);
+            else if (func == "clear")
+                Console.ReadKey(true);
+            else if (func == "foreground")
+                Console.ForegroundColor = Globl.ParseBy(arg);
+            else if (func == "background")
+                Console.BackgroundColor = Globl.ParseBy(arg);
+            else if (func == "getline")
+            {
+                string text = Console.ReadLine();
+                if (Program.vars.ContainsKey(arg))
+                    Program.vars[arg] = text;
+                else
+                    Program.vars.Add(arg, text);
+            }
+            else if (func == "getkey")
+            {
+                string key = Console.ReadKey().Key.ToString();
+                if (Program.vars.ContainsKey(arg))
+                    Program.vars[arg] = key;
+                else
+                    Program.vars.Add(arg, key);
+            }
+            else if (func == "sgetkey")
+            {
+                string skey = Console.ReadKey().Key.ToString();
+                if (Program.vars.ContainsKey(arg))
+                    Program.vars[arg] = skey;
+                else
+                    Program.vars.Add(arg, skey);
+            }
+            else if (func == "goto")
+            {
+                int kk = Program.Search(0, arg + ":");
+                if (kk != -1)
+                    Program.index = kk;
+                else
+                    throw new Exception("Not found label " + arg);
+            }
+            else if (func == "set")
+            {
+                string[] splt = arg.Split(' ');
+                if (Program.vars.ContainsKey(splt[0]))
+                    Program.vars[splt[0]] = Globl.ConvertS(splt[1]);
+                else
+                    throw new Exception("Not found variable " + splt[0]);
+            }
+            else if (func == "add")
+            {
+                string[] splt = Globl.SplitByFirst(arg, ' ');
+                if (Program.arrs.ContainsKey(splt[0]))
+                    Program.arrs[splt[0]].Add(Globl.ConvertS(splt[1]));
+                else
+                    throw new Exception("Not found array " + splt[0]);
+            }
+            else if (func == "rem")
+            {
+                string[] splt = Globl.SplitByFirst(arg, ' ');
+                if (Program.arrs.ContainsKey(splt[0]))
+                    Program.arrs[splt[0]].RemoveAt(int.Parse(splt[1]));
+                else
+                    throw new Exception("Not found array " + splt[0]);
+            }
+            else if (func == "clr")
+            {
+                if (Program.arrs.ContainsKey(arg))
+                    Program.arrs[arg].Clear();
+                else
+                    throw new Exception("Not found array " + arg);
+            }
+            else if (func == "edit")
+            {
+                string[] splt = Globl.SplitByFirst(arg, ' ');
+                string arr = splt[0];
+                string[] splt2 = Globl.SplitByFirst(splt[1], ' ');
+                int index = int.Parse(splt2[0]);
+                string var = splt2[1];
+                if (Program.arrs.ContainsKey(arr))
+                    Program.arrs[arr][index] = Globl.ConvertS(arg);
+                else
+                    throw new Exception("Not found array " + arr);
+            }
+            else if (func == "alen")
+            {
+                string[] splt = Globl.SplitByFirst(arg, ' ');
+                string arr = splt[0];
+                string[] splt2 = Globl.SplitByFirst(splt[1], ' ');
+                int index = int.Parse(splt2[0]);
+                string var = splt2[1];
+                if (Program.arrs.ContainsKey(arr))
+                {
+                    if (Program.vars.ContainsKey(var))
+                        Program.vars[var] = "" + Program.arrs[arr].Count;
                     else
-                        Program.vars.Add(arg, text);
-                    break;
-                case "getkey":
-                    string key = Console.ReadKey().Key.ToString();
-                    if (Program.vars.ContainsKey(arg))
-                        Program.vars[arg] = key;
+                        throw new Exception("Not found variable " + var);
+                }
+                else
+                    throw new Exception("Not found array " + arr);
+            }
+            else if (func == "len")
+            {
+                string[] splt = Globl.SplitByFirst(arg, ' ');
+                string var1 = splt[0];
+                string var2 = splt[1];
+                if (Program.vars.ContainsKey(var1))
+                {
+                    if (Program.vars.ContainsKey(var2))
+                        Program.vars[var2] = "" + Program.vars[var1].Length;
                     else
-                        Program.vars.Add(arg, key);
-                    break;
-                case "sgetkey":
-                    string skey = Console.ReadKey().Key.ToString();
-                    if (Program.vars.ContainsKey(arg))
-                        Program.vars[arg] = skey;
+                        throw new Exception("Not found variable " + var2);
+                }
+                else
+                    throw new Exception("Not found variable " + var1);
+            }
+            else if (func == "remc")
+            {
+                string[] splt = Globl.SplitByFirst(arg, ' ');
+                string var = splt[0];
+                string[] splt2 = Globl.SplitByFirst(splt[1], ' ');
+                int index = int.Parse(splt2[0]);
+                int len = int.Parse(splt2[1]);
+                if (Program.vars.ContainsKey(splt[0]))
+                    Program.vars[var] = Program.vars[var].Remove(index, len);
+                else
+                    throw new Exception("Not found variable " + var);
+            }
+            else if (func == "subs")
+            {
+                string[] splt = Globl.SplitByFirst(arg, ' ');
+                string var = splt[0];
+                string[] splt2 = Globl.SplitByFirst(splt[1], ' ');
+                int index = int.Parse(splt2[0]);
+                int len = int.Parse(splt2[1]);
+                if (Program.vars.ContainsKey(splt[0]))
+                    Program.vars[var] = Program.vars[var].Substring(index, len);
+                else
+                    throw new Exception("Not found variable " + var);
+            }
+            else if (func == "get")
+            {
+                string[] splt = Globl.SplitByFirst(arg, ' ');
+                string arr = splt[0];
+                string[] splt2 = Globl.SplitByFirst(splt[1], ' ');
+                int index = int.Parse(splt2[0]);
+                string var = splt2[1];
+                if (Program.arrs.ContainsKey(splt[0]))
+                {
+                    if (Program.vars.ContainsKey(var))
+                        Program.vars[var] = Program.arrs[arr][index];
                     else
-                        Program.vars.Add(arg, skey);
-                    break;
-                case "goto":
-                    int kk = Program.Search(0, arg + ":");
-                    if (kk != -1)
-                        Program.index = kk;
-                    else
-                        throw new Exception("Not found label " + arg);
-                    break;
-                case "set":
-                    string[] splt = arg.Split(' ');
-                    if (Program.vars.ContainsKey(splt[0]))
-                        Program.vars[splt[0]] = Globl.ConvertS(splt[1]);
-                    else
-                        throw new Exception("Not found variable " + splt[0]);
-                    break;
-                case "if":
-                    string[] spl = arg.Split(' ');
-                    byte kn = byte.Parse(spl[0]);
-                    string one = "";
-                    string two = "";
-                    string oper = spl[2];
-                    if (Program.vars.ContainsKey(spl[1])) one = Program.vars[spl[1]];
-                    else throw new Exception("Not found variable " + spl[1]);
-                    if (Program.vars.ContainsKey(spl[3])) two = Program.vars[spl[3]];
-                    else throw new Exception("Not found variable " + spl[3]);
-                    switch(oper)
-                    {
-                        case "==":
-                            if (one != two)
-                            {
-                                int k1 = Program.Search(Program.index, "endif " + kn);
-                                if (k1 != -1)
-                                    Program.index = k1;
-                                else
-                                    throw new Exception("Not found endif " + kn);
-                            }
-                            break;
-                        case "!=":
-                            if (one == two)
-                            {
-                                int k1 = Program.Search(Program.index, "endif " + kn);
-                                if (k1 != -1)
-                                    Program.index = k1;
-                                else
-                                    throw new Exception("Not found endif " + kn);
-                            }
-                            break;
-                        case "?=":
-                            if (!one.Contains(two))
-                            {
-                                int k1 = Program.Search(Program.index, "endif " + kn);
-                                if (k1 != -1)
-                                    Program.index = k1;
-                                else
-                                    throw new Exception("Not found endif " + kn);
-                            }
-                            break;
-                        case "?!":
-                            if (one.Contains(two))
-                            {
-                                int k1 = Program.Search(Program.index, "endif " + kn);
-                                if (k1 != -1)
-                                    Program.index = k1;
-                                else
-                                    throw new Exception("Not found endif " + kn);
-                            }
-                            break;
-                        case "(=":
-                            if (!one.StartsWith(two))
-                            {
-                                int k1 = Program.Search(Program.index, "endif " + kn);
-                                if (k1 != -1)
-                                    Program.index = k1;
-                                else
-                                    throw new Exception("Not found endif " + kn);
-                            }
-                            break;
-                        case "(!":
-                            if (one.StartsWith(two))
-                            {
-                                int k1 = Program.Search(Program.index, "endif " + kn);
-                                if (k1 != -1)
-                                    Program.index = k1;
-                                else
-                                    throw new Exception("Not found endif " + kn);
-                            }
-                            break;
-                        case ")=":
-                            if (!one.EndsWith(two))
-                            {
-                                int k1 = Program.Search(Program.index, "endif " + kn);
-                                if (k1 != -1)
-                                    Program.index = k1;
-                                else
-                                    throw new Exception("Not found endif " + kn);
-                            }
-                            break;
-                        case ")!":
-                            if (one.EndsWith(two))
-                            {
-                                int k1 = Program.Search(Program.index, "endif " + kn);
-                                if (k1 != -1)
-                                    Program.index = k1;
-                                else
-                                    throw new Exception("Not found endif " + kn);
-                            }
-                            break;
-                        case "<=":
-                            double onea = double.Parse(one);
-                            double twoa = double.Parse(two);
-                            if (onea <= twoa)
-                            {
-                                int k1 = Program.Search(Program.index, "endif " + kn);
-                                if (k1 != -1)
-                                    Program.index = k1;
-                                else
-                                    throw new Exception("Not found endif " + kn);
-                            }
-                            break;
-                        case ">=":
-                            double onea2 = double.Parse(one);
-                            double twoa2 = double.Parse(two);
-                            if (onea2 >= twoa2)
-                            {
-                                int k1 = Program.Search(Program.index, "endif " + kn);
-                                if (k1 != -1)
-                                    Program.index = k1;
-                                else
-                                    throw new Exception("Not found endif " + kn);
-                            }
-                            break;
-                        case "<":
-                            double onea3 = double.Parse(one);
-                            double twoa3 = double.Parse(two);
-                            if (onea3 < twoa3)
-                            {
-                                int k1 = Program.Search(Program.index, "endif " + kn);
-                                if (k1 != -1)
-                                    Program.index = k1;
-                                else
-                                    throw new Exception("Not found endif " + kn);
-                            }
-                            break;
-                        case ">":
-                            double onea4 = double.Parse(one);
-                            double twoa4 = double.Parse(two);
-                            if (onea4 > twoa4)
-                            {
-                                int k1 = Program.Search(Program.index, "endif " + kn);
-                                if (k1 != -1)
-                                    Program.index = k1;
-                                else
-                                    throw new Exception("Not found endif " + kn);
-                            }
-                            break;
-                    }
-                    break;
+                        throw new Exception("Not found variable " + var);
+                }
+                else
+                    throw new Exception("Not found array " + splt[0]);
+            }
+            else if (func == "if")
+            {
+                string[] spl = arg.Split(' ');
+                byte kn = byte.Parse(spl[0]);
+                string one = "";
+                string two = "";
+                string oper = spl[2];
+                if (Program.vars.ContainsKey(spl[1])) one = Program.vars[spl[1]];
+                else throw new Exception("Not found variable " + spl[1]);
+                if (Program.vars.ContainsKey(spl[3])) two = Program.vars[spl[3]];
+                else throw new Exception("Not found variable " + spl[3]);
+                switch (oper)
+                {
+                    case "==":
+                        if (one != two)
+                        {
+                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            if (k1 != -1)
+                                Program.index = k1;
+                            else
+                                throw new Exception("Not found endif " + kn);
+                        }
+                        break;
+                    case "!=":
+                        if (one == two)
+                        {
+                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            if (k1 != -1)
+                                Program.index = k1;
+                            else
+                                throw new Exception("Not found endif " + kn);
+                        }
+                        break;
+                    case "?=":
+                        if (!one.Contains(two))
+                        {
+                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            if (k1 != -1)
+                                Program.index = k1;
+                            else
+                                throw new Exception("Not found endif " + kn);
+                        }
+                        break;
+                    case "?!":
+                        if (one.Contains(two))
+                        {
+                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            if (k1 != -1)
+                                Program.index = k1;
+                            else
+                                throw new Exception("Not found endif " + kn);
+                        }
+                        break;
+                    case "(=":
+                        if (!one.StartsWith(two))
+                        {
+                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            if (k1 != -1)
+                                Program.index = k1;
+                            else
+                                throw new Exception("Not found endif " + kn);
+                        }
+                        break;
+                    case "(!":
+                        if (one.StartsWith(two))
+                        {
+                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            if (k1 != -1)
+                                Program.index = k1;
+                            else
+                                throw new Exception("Not found endif " + kn);
+                        }
+                        break;
+                    case ")=":
+                        if (!one.EndsWith(two))
+                        {
+                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            if (k1 != -1)
+                                Program.index = k1;
+                            else
+                                throw new Exception("Not found endif " + kn);
+                        }
+                        break;
+                    case ")!":
+                        if (one.EndsWith(two))
+                        {
+                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            if (k1 != -1)
+                                Program.index = k1;
+                            else
+                                throw new Exception("Not found endif " + kn);
+                        }
+                        break;
+                    case "<=":
+                        double onea = double.Parse(one);
+                        double twoa = double.Parse(two);
+                        if (onea <= twoa)
+                        {
+                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            if (k1 != -1)
+                                Program.index = k1;
+                            else
+                                throw new Exception("Not found endif " + kn);
+                        }
+                        break;
+                    case ">=":
+                        double onea2 = double.Parse(one);
+                        double twoa2 = double.Parse(two);
+                        if (onea2 >= twoa2)
+                        {
+                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            if (k1 != -1)
+                                Program.index = k1;
+                            else
+                                throw new Exception("Not found endif " + kn);
+                        }
+                        break;
+                    case "<":
+                        double onea3 = double.Parse(one);
+                        double twoa3 = double.Parse(two);
+                        if (onea3 < twoa3)
+                        {
+                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            if (k1 != -1)
+                                Program.index = k1;
+                            else
+                                throw new Exception("Not found endif " + kn);
+                        }
+                        break;
+                    case ">":
+                        double onea4 = double.Parse(one);
+                        double twoa4 = double.Parse(two);
+                        if (onea4 > twoa4)
+                        {
+                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            if (k1 != -1)
+                                Program.index = k1;
+                            else
+                                throw new Exception("Not found endif " + kn);
+                        }
+                        break;
+                }
+            }
 
-                case "include":
+                else if (func == "include")
+                {
                     if (File.Exists(arg + ".dll"))
                     {
                         Assembly a = Assembly.Load(arg); // Загружаем библиотеку
@@ -216,9 +347,10 @@ namespace lswwa
                     }
                     else
                         throw new Exception("Not found file " + arg);
-                    break;
+                }
 
-                default:
+                else
+                {
                     if (!func.Contains("."))
                         throw new Exception("Not found function " + func);
                     else
@@ -229,22 +361,21 @@ namespace lswwa
                             object[] objs = libs[ll[0]];
                             object[] args =
                             {
-                                ll[1],
-                                arg,
-                                Program.fil,
-                                Program.cod,
-                                Program.vars,
-                                Program.index,
-                                Globl.Version + "." + Globl.SubVersion + "." + Globl.Build
-                            };
+                                    ll[1],
+                                    arg,
+                                    Program.fil,
+                                    Program.cod,
+                                    Program.vars,
+                                    Program.index,
+                                    Globl.Version + "." + Globl.SubVersion + "." + Globl.Build
+                                };
                             Object o = objs[0];
                             MethodInfo mi = (MethodInfo)objs[1];
                             mi.Invoke(o, args);
                         }
                         else
                             throw new Exception("Not found library " + ll[0]);
-                    }
-                    break;
+                }
             }
         }
     }

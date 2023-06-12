@@ -14,6 +14,7 @@ namespace lswwa
         public static List<string> code = new List<string> { };
         public static List<string> cod = new List<string> { };
         public static Dictionary<string, string> vars = new Dictionary<string, string> { };
+        public static Dictionary<string, List<string>> arrs = new Dictionary<string, List<string>> { };
         public static int index = 0;
 
         public static void Main(string[] args)
@@ -40,7 +41,16 @@ namespace lswwa
                                 if (code[i] != String.Empty)
                                 {
                                     string[] sl = Globl.SplitByFirst(code[i], ' ');
-                                    vars.Add(sl[0], sl[1]);
+                                    string name = sl[0];
+                                    string[] sl2 = Globl.SplitByFirst(sl[1], ' ');
+                                    string type = sl2[0];
+                                    string text = sl2[1];
+                                    if (type == "var")
+                                        vars.Add(name, text);
+                                    else if (type == "list")
+                                        arrs.Add(name, new List<string> { });
+                                    else
+                                        throw new Exception("Unkown type " + type);
                                 }
                             }
                             catch (Exception e) { Console.WriteLine("Line::" + i + "\nText::" + code[i] + "\nError::" + e.Message); Console.ReadKey(true); Environment.Exit(0); }
@@ -60,12 +70,36 @@ namespace lswwa
 
                     for(index = 0; index < cod.Count; index++)
                     {
-                        //try
-                        //{
-                            string[] sl = Globl.SplitByFirst(cod[index], ' ');
-                            Command.Do(sl[0], sl[1]);
-                        //}
-                        //catch (Exception e) { Console.WriteLine("Line::" + index + "\nText::" + cod[index] + "\nError::" + e.Message); Console.ReadKey(true); Environment.Exit(0); }
+                        try
+                        {
+                            if (!cod[index].StartsWith("endif "))
+                            {
+                                if (cod[index].StartsWith("@"))
+                                {
+                                    try
+                                    {
+                                        string[] sl = Globl.SplitByFirst(cod[index].Remove(0, 1), ' ');
+                                        Command.Do(sl[0], sl[1]);
+                                    }
+                                    catch { }
+                                }
+                                else if (cod[index].StartsWith("#"))
+                                {
+                                    try
+                                    {
+                                        string[] sl = Globl.SplitByFirst(cod[index].Remove(0, 1), ' ');
+                                        Command.Do(sl[0], sl[1]);
+                                    }
+                                    catch (Exception e) { File.WriteAllText("exception", "Line::" + index + "\nText::" + cod[index] + "\nError::" + e.Message); }
+                                }
+                                else
+                                {
+                                    string[] sl = Globl.SplitByFirst(cod[index], ' ');
+                                    Command.Do(sl[0], sl[1]);
+                                }
+                            }
+                        }
+                        catch (Exception e) { Console.WriteLine("Line::" + index + "\nText::" + cod[index] + "\nError::" + e.Message); Console.ReadKey(true); Environment.Exit(0); }
                         //Console.WriteLine(sl[0] + "|" + sl[1]);
                     }
                 }
