@@ -11,7 +11,7 @@
 **ОБЯЗАТЕЛЬНО** называем класс _Program_(файл в том числе) и делаем его публичным.  
 Дальше создаём такой метод:  
 ```cs
-public static void Do(string func, string arg, string file, List<string> code, Dictionary<string, string> vars, int index, string version) {
+public static void Do(string func, string arg, string file, List<string> code, Dictionary<string, string> vars, Dictionary<string, string> arrs, int index, string version) {
     // Тут ваш код
 }
 ```
