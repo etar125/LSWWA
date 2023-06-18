@@ -365,7 +365,7 @@ namespace lswwa
             }
             else if (func == "set")
             {
-                string[] splt = arg.Split(' ');
+                string[] splt = Globl.SplitByFirst(arg, ' ');
                 if (Program.vars.ContainsKey(splt[0]))
                     Program.vars[splt[0]] = Globl.ConvertS(splt[1]);
                 else
