@@ -20,6 +20,7 @@ namespace lswwa
         };
         public static Dictionary<string, List<string>> funcs = new Dictionary<string, List<string>> { };
         public static Dictionary<string, List<string>> fancs = new Dictionary<string, List<string>> { };
+        public static Dictionary<string, List<string>> fincs = new Dictionary<string, List<string>> { };
         public static Exception ex = new Exception("no error");
         public static bool intry = false;
         public static int index = 0;
@@ -108,6 +109,25 @@ namespace lswwa
                                         else
                                             throw new Exception("Not found " + name + " end");
                                     }
+                                    else if (coda[a].StartsWith("%"))
+                                    {
+                                        List<string> mcode = new List<string> { };
+                                        string[] sl = Globl.SplitByFirst(code[a], ' ');
+                                        string name = sl[0].Remove(0, 1);
+                                        string arg = sl[1];
+                                        mcode.Add(arg);
+                                        int kk = ISearch(coda, a + 1, "%end");
+                                        if (kk != -1)
+                                        {
+                                            for (int k = a + 1; k < kk; k++)
+                                                if (!coda[k].StartsWith(";"))
+                                                    mcode.Add(Globl.RemoveByLast(coda[k].Trim(), ';'));
+                                            fincs.Add(name, mcode);
+                                            a = kk;
+                                        }
+                                        else
+                                            throw new Exception("Not found " + name + " end");
+                                    }
                                 }
                             }
                             catch (Exception e) { Console.WriteLine("Line::" + a + "\nText::" + coda[a] + "\nError::" + e.Message); Console.ReadKey(true); Environment.Exit(0); }
@@ -174,7 +194,7 @@ namespace lswwa
                                 try
                                 {
                                     string[] sl = Globl.SplitByFirst(cod[index].Remove(0, 1), ' ');
-                                    Command.Do(sl[0], sl[1]);
+                                    Command.Do(sl[0], sl[1], index);
                                 }
                                 catch { }
                             }
@@ -183,14 +203,14 @@ namespace lswwa
                                 try
                                 {
                                     string[] sl = Globl.SplitByFirst(cod[index].Remove(0, 1), ' ');
-                                    Command.Do(sl[0], sl[1]);
+                                    Command.Do(sl[0], sl[1], index);
                                 }
                                 catch (Exception e) { File.WriteAllText("exception", "Line::" + index + "\nText::" + cod[index] + "\nError::" + e.Message); }
                             }
                             else
                             {
                                 string[] sl = Globl.SplitByFirst(cod[index], ' ');
-                                Command.Do(sl[0], sl[1]);
+                                Command.Do(sl[0], sl[1], index);
                             }
                         }
                     }

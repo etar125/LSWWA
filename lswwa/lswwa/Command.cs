@@ -11,8 +11,9 @@ namespace lswwa
     class Command
     {
         public static Dictionary<string, object[]> libs = new Dictionary<string, object[]> {};
+        public static Dictionary<string, object[]> slibs = new Dictionary<string, object[]> { };
 
-        public static void Do(string func, string arg)
+        public static void Do(string func, string arg, int indx)
         {
             if (func == "print")
                 Console.Write(Globl.ConvertS(arg));
@@ -54,7 +55,7 @@ namespace lswwa
                                         try
                                         {
                                             string[] sl = Globl.SplitByFirst(cod[index].Remove(0, 1), ' ');
-                                            Command.Do(sl[0], sl[1]);
+                                            Command.Do(sl[0], sl[1], index);
                                         }
                                         catch { }
                                     }
@@ -63,14 +64,14 @@ namespace lswwa
                                         try
                                         {
                                             string[] sl = Globl.SplitByFirst(cod[index].Remove(0, 1), ' ');
-                                            Command.Do(sl[0], sl[1]);
+                                            Command.Do(sl[0], sl[1], index);
                                         }
                                         catch (Exception e) { File.WriteAllText("exception", "Line::" + index + "\nText::" + cod[index] + "\nError::" + e.Message); }
                                     }
                                     else
                                     {
                                         string[] sl = Globl.SplitByFirst(cod[index], ' ');
-                                        Command.Do(sl[0], sl[1]);
+                                        Command.Do(sl[0], sl[1], index);
                                     }
                                 }
                             }
@@ -130,7 +131,7 @@ namespace lswwa
                                     try
                                     {
                                         string[] sl = Globl.SplitByFirst(cod[index].Remove(0, 1), ' ');
-                                        Command.Do(sl[0], sl[1]);
+                                        Command.Do(sl[0], sl[1], index);
                                     }
                                     catch { }
                                 }
@@ -139,14 +140,14 @@ namespace lswwa
                                     try
                                     {
                                         string[] sl = Globl.SplitByFirst(cod[index].Remove(0, 1), ' ');
-                                        Command.Do(sl[0], sl[1]);
+                                        Command.Do(sl[0], sl[1], index);
                                     }
                                     catch (Exception e) { File.WriteAllText("exception", "Line::" + index + "\nText::" + cod[index] + "\nError::" + e.Message); }
                                 }
                                 else
                                 {
                                     string[] sl = Globl.SplitByFirst(cod[index], ' ');
-                                    Command.Do(sl[0], sl[1]);
+                                    Command.Do(sl[0], sl[1], index);
                                 }
                             }
                         }
@@ -168,6 +169,90 @@ namespace lswwa
                             }
                         }
                     }
+                }
+                else
+                    throw new Exception("Not found method " + func);
+            }
+            else if (func.StartsWith("%"))
+            {
+                func = func.Remove(0, 1);
+                if (Program.fincs.ContainsKey(func))
+                {
+                    List<string> cod = Program.fincs[func];
+                    string ag = cod[0];
+                    cod.RemoveAt(0);
+                    if (Program.vars.ContainsKey(arg))
+                    {
+                        if (Program.vars.ContainsKey(ag))
+                            Program.vars[ag] = Program.vars[arg];
+                        else
+                            Program.vars.Add(ag, Program.vars[arg]);
+                        int index;
+                        bool intry = false;
+                        for (index = 0; index < cod.Count; index++)
+                        {
+                            try
+                            {
+                                if (!cod[index].StartsWith("endif ") && cod[index] != "end" && !cod[index].StartsWith(":") && cod[index] != "catch")
+                                {
+                                    if (cod[index] == "try")
+                                        intry = true;
+                                    else if (cod[index] == "catch" && intry)
+                                    {
+                                        intry = false;
+                                        int kk = Program.Search(index, "end");
+                                        if (kk != -1)
+                                        {
+                                            index = kk;
+                                        }
+                                    }
+                                    else if (cod[index].StartsWith("@"))
+                                    {
+                                        try
+                                        {
+                                            string[] sl = Globl.SplitByFirst(cod[index].Remove(0, 1), ' ');
+                                            Command.Do(sl[0], sl[1], index);
+                                        }
+                                        catch { }
+                                    }
+                                    else if (cod[index].StartsWith("!"))
+                                    {
+                                        try
+                                        {
+                                            string[] sl = Globl.SplitByFirst(cod[index].Remove(0, 1), ' ');
+                                            Command.Do(sl[0], sl[1], index);
+                                        }
+                                        catch (Exception e) { File.WriteAllText("exception", "Line::" + index + "\nText::" + cod[index] + "\nError::" + e.Message); }
+                                    }
+                                    else
+                                    {
+                                        string[] sl = Globl.SplitByFirst(cod[index], ' ');
+                                        Command.Do(sl[0], sl[1], index);
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                if (!intry)
+                                {
+                                    Console.WriteLine("Line::" + index + "\nText::" + cod[index] + "\nError::" + e.Message); Console.ReadKey(true); Environment.Exit(0);
+                                }
+                                else
+                                {
+                                    Program.ex = e;
+                                    int kk = Program.Search(index, "catch");
+                                    if (kk != -1)
+                                    {
+                                        index = kk;
+                                        intry = false;
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                    else
+                        throw new Exception("Not found variable " + arg);
                 }
                 else
                     throw new Exception("Not found method " + func);
@@ -203,6 +288,50 @@ namespace lswwa
                 else
                     Program.vars.Add(arg, text);
             }
+            else if (func == "getpos")
+            {
+                if (Program.arrs.ContainsKey(arg))
+                    Program.arrs[arg] = new List<string> { Console.WindowLeft.ToString(), Console.WindowTop.ToString() };
+                else
+                    Program.arrs.Add(arg, new List<string> { Console.WindowLeft.ToString(), Console.WindowTop.ToString() });
+            }
+            else if (func == "getsize")
+            {
+                if (Program.arrs.ContainsKey(arg))
+                    Program.arrs[arg] = new List<string> { Console.WindowWidth.ToString(), Console.WindowHeight.ToString() };
+                else
+                    Program.arrs.Add(arg, new List<string> { Console.WindowWidth.ToString(), Console.WindowHeight.ToString() });
+            }
+            else if (func == "setpos")
+            {
+                if (Program.arrs.ContainsKey(arg))
+                    Console.SetWindowPosition(int.Parse(Program.arrs[arg][0]), int.Parse(Program.arrs[arg][1]));
+                else
+                    throw new Exception("Not found array " + arg);
+            }
+            else if (func == "setsize")
+            {
+                if (Program.arrs.ContainsKey(arg))
+                    Console.SetWindowSize(int.Parse(Program.arrs[arg][0]), int.Parse(Program.arrs[arg][1]));
+                else
+                    throw new Exception("Not found array " + arg);
+            }
+            else if (func == "getcpos")
+            {
+                if (Program.arrs.ContainsKey(arg))
+                    Program.arrs[arg] = new List<string> { Console.CursorLeft.ToString(), Console.CursorTop.ToString() };
+                else
+                    Program.arrs.Add(arg, new List<string> { Console.CursorLeft.ToString(), Console.CursorTop.ToString() });
+            }
+            else if (func == "setcpos")
+            {
+                if (Program.arrs.ContainsKey(arg))
+                    Console.SetCursorPosition(int.Parse(Program.arrs[arg][0]), int.Parse(Program.arrs[arg][1]));
+                else
+                    throw new Exception("Not found array " + arg);
+            }
+            else if (func == "wait")
+                System.Threading.Thread.Sleep(int.Parse(arg));
             else if (func == "eget")
             {
                 if (Program.vars.ContainsKey(arg))
@@ -230,7 +359,7 @@ namespace lswwa
             {
                 int kk = Program.Search(0, ":" + arg);
                 if (kk != -1)
-                    Program.index = kk;
+                    indx = kk;
                 else
                     throw new Exception("Not found label " + arg);
             }
@@ -248,7 +377,7 @@ namespace lswwa
                 if (Program.arrs.ContainsKey(splt[0]))
                     Program.arrs[splt[0]].Add(Globl.ConvertS(splt[1]));
                 else
-                    throw new Exception("Not found array " + splt[0]);
+                    Program.arrs.Add(splt[0], new List<string> { Globl.ConvertS(splt[1]) });
             }
             else if (func == "rem")
             {
@@ -355,9 +484,9 @@ namespace lswwa
                     case "==":
                         if (one != two)
                         {
-                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            int k1 = Program.Search(indx, "endif " + kn);
                             if (k1 != -1)
-                                Program.index = k1;
+                                indx = k1;
                             else
                                 throw new Exception("Not found endif " + kn);
                         }
@@ -365,9 +494,9 @@ namespace lswwa
                     case "!=":
                         if (one == two)
                         {
-                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            int k1 = Program.Search(indx, "endif " + kn);
                             if (k1 != -1)
-                                Program.index = k1;
+                                indx = k1;
                             else
                                 throw new Exception("Not found endif " + kn);
                         }
@@ -375,9 +504,9 @@ namespace lswwa
                     case "?=":
                         if (!one.Contains(two))
                         {
-                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            int k1 = Program.Search(indx, "endif " + kn);
                             if (k1 != -1)
-                                Program.index = k1;
+                                indx = k1;
                             else
                                 throw new Exception("Not found endif " + kn);
                         }
@@ -385,9 +514,9 @@ namespace lswwa
                     case "?!":
                         if (one.Contains(two))
                         {
-                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            int k1 = Program.Search(indx, "endif " + kn);
                             if (k1 != -1)
-                                Program.index = k1;
+                                indx = k1;
                             else
                                 throw new Exception("Not found endif " + kn);
                         }
@@ -395,9 +524,9 @@ namespace lswwa
                     case "(=":
                         if (!one.StartsWith(two))
                         {
-                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            int k1 = Program.Search(indx, "endif " + kn);
                             if (k1 != -1)
-                                Program.index = k1;
+                                indx = k1;
                             else
                                 throw new Exception("Not found endif " + kn);
                         }
@@ -405,9 +534,9 @@ namespace lswwa
                     case "(!":
                         if (one.StartsWith(two))
                         {
-                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            int k1 = Program.Search(indx, "endif " + kn);
                             if (k1 != -1)
-                                Program.index = k1;
+                                indx = k1;
                             else
                                 throw new Exception("Not found endif " + kn);
                         }
@@ -415,9 +544,9 @@ namespace lswwa
                     case ")=":
                         if (!one.EndsWith(two))
                         {
-                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            int k1 = Program.Search(indx, "endif " + kn);
                             if (k1 != -1)
-                                Program.index = k1;
+                                indx = k1;
                             else
                                 throw new Exception("Not found endif " + kn);
                         }
@@ -425,9 +554,9 @@ namespace lswwa
                     case ")!":
                         if (one.EndsWith(two))
                         {
-                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            int k1 = Program.Search(indx, "endif " + kn);
                             if (k1 != -1)
-                                Program.index = k1;
+                                indx = k1;
                             else
                                 throw new Exception("Not found endif " + kn);
                         }
@@ -437,9 +566,9 @@ namespace lswwa
                         double twoa = double.Parse(two);
                         if (onea <= twoa)
                         {
-                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            int k1 = Program.Search(indx, "endif " + kn);
                             if (k1 != -1)
-                                Program.index = k1;
+                                indx = k1;
                             else
                                 throw new Exception("Not found endif " + kn);
                         }
@@ -449,9 +578,9 @@ namespace lswwa
                         double twoa2 = double.Parse(two);
                         if (onea2 >= twoa2)
                         {
-                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            int k1 = Program.Search(indx, "endif " + kn);
                             if (k1 != -1)
-                                Program.index = k1;
+                                indx = k1;
                             else
                                 throw new Exception("Not found endif " + kn);
                         }
@@ -461,9 +590,9 @@ namespace lswwa
                         double twoa3 = double.Parse(two);
                         if (onea3 < twoa3)
                         {
-                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            int k1 = Program.Search(indx, "endif " + kn);
                             if (k1 != -1)
-                                Program.index = k1;
+                                indx = k1;
                             else
                                 throw new Exception("Not found endif " + kn);
                         }
@@ -473,9 +602,9 @@ namespace lswwa
                         double twoa4 = double.Parse(two);
                         if (onea4 > twoa4)
                         {
-                            int k1 = Program.Search(Program.index, "endif " + kn);
+                            int k1 = Program.Search(indx, "endif " + kn);
                             if (k1 != -1)
-                                Program.index = k1;
+                                indx = k1;
                             else
                                 throw new Exception("Not found endif " + kn);
                         }
@@ -497,7 +626,129 @@ namespace lswwa
                     libs.Add(name, new object[] { o, mi });
                 }
                 else
-                    throw new Exception("Not found file " + arg);
+                    throw new Exception("Not found file " + dll + ".dll");
+            }
+            else if (func == "sinclude")
+            {
+                string[] sl = Globl.SplitByFirst(arg, ' ');
+                string dll = sl[0];
+                string name = sl[1];
+                if (File.Exists(dll + ".lib"))
+                {
+                    Dictionary<string, List<string>> funcs = new Dictionary<string, List<string>> { };
+                    Dictionary<string, List<string>> fancs = new Dictionary<string, List<string>> { };
+                    Dictionary<string, List<string>> fincs = new Dictionary<string, List<string>> { };
+                    List<string> code = new List<string> { };
+                    List<string> cod = new List<string> { };
+                    foreach (string s in File.ReadAllLines(dll + ".lib"))
+                        code.Add(s);
+                    bool doom = false;
+                    for (int i = 0; i < code.Count && !doom; i++)
+                    {
+                        if (code[i] == "methods")
+                        {
+                            List<string> coda = code;
+                            for (int a = i + 1; a < coda.Count; a++)
+                            {
+                                try
+                                {
+                                    coda[a] = coda[a].Trim();
+                                    if (coda[a] == "begin")
+                                    {
+                                        doom = true;
+                                        break;
+                                    }
+                                    else if (coda[a] != String.Empty)
+                                    {
+                                        if (coda[a].StartsWith("$"))
+                                        {
+                                            List<string> mcode = new List<string> { };
+                                            string[] sla = Globl.SplitByFirst(code[a], ' ');
+                                            string nam = sla[0].Remove(0, 1);
+                                            string ar = sla[1];
+                                            mcode.Add(ar);
+                                            int kk = Program.ISearch(coda, a + 1, "$end");
+                                            if (kk != -1)
+                                            {
+                                                for (int k = a + 1; k < kk; k++)
+                                                    if (!coda[k].StartsWith(";"))
+                                                        mcode.Add(Globl.RemoveByLast(coda[k].Trim(), ';'));
+                                                funcs.Add(nam, mcode);
+                                                a = kk;
+                                            }
+                                            else
+                                                throw new Exception("Not found " + nam + " end in library " + dll);
+                                        }
+                                        else if (coda[a].StartsWith("#"))
+                                        {
+                                            List<string> mcode = new List<string> { };
+                                            string nam = coda[a].Remove(0, 1);
+                                            int kk = Program.ISearch(coda, a + 1, "#end");
+                                            if (kk != -1)
+                                            {
+                                                for (int k = a + 1; k < kk; k++)
+                                                    if (!coda[k].StartsWith(";"))
+                                                        mcode.Add(Globl.RemoveByLast(coda[k].Trim(), ';'));
+                                                fancs.Add(nam, mcode);
+                                                a = kk;
+                                            }
+                                            else
+                                                throw new Exception("Not found " + name + " end in library " + dll);
+                                        }
+                                        else if (coda[a].StartsWith("%"))
+                                        {
+                                            List<string> mcode = new List<string> { };
+                                            string[] sla = Globl.SplitByFirst(code[a], ' ');
+                                            string nam = sla[0].Remove(0, 1);
+                                            string ar = sla[1];
+                                            mcode.Add(ar);
+                                            int kk = Program.ISearch(coda, a + 1, "%end");
+                                            if (kk != -1)
+                                            {
+                                                for (int k = a + 1; k < kk; k++)
+                                                    if (!coda[k].StartsWith(";"))
+                                                        mcode.Add(Globl.RemoveByLast(coda[k].Trim(), ';'));
+                                                fincs.Add(nam, mcode);
+                                                a = kk;
+                                            }
+                                            else
+                                                throw new Exception("Not found " + name + " end in library " + dll);
+                                        }
+                                    }
+                                }
+                                catch (Exception e) { Console.WriteLine("Line::" + a + "\nText::" + coda[a] + "\nError::" + e.Message); Console.ReadKey(true); Environment.Exit(0); }
+                            }
+                        }
+                        else if (code[i] == "begin")
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            try
+                            {
+                                if (code[i] != String.Empty)
+                                {
+                                    string[] sla = Globl.SplitByFirst(code[i], ' ');
+                                    string nam = sla[0];
+                                    string[] sl2 = Globl.SplitByFirst(sla[1], ' ');
+                                    string type = sl2[0];
+                                    string text = sl2[1];
+                                    if (type == "var")
+                                        Program.vars.Add(nam, text);
+                                    else if (type == "list")
+                                        Program.arrs.Add(nam, new List<string> { });
+                                    else
+                                        throw new Exception("Unkown type " + type);
+                                }
+                            }
+                            catch (Exception e) { Console.WriteLine("Line::" + i + "\nText::" + code[i] + "\nError::" + e.Message); Console.ReadKey(true); Environment.Exit(0); }
+                        }
+                    }
+                    slibs.Add(name, new object[] { fancs, fincs, funcs });
+                }
+                else
+                    throw new Exception("Not found file " + dll + ".lib");
             }
 
             else
@@ -507,19 +758,250 @@ namespace lswwa
                 else
                 {
                     string[] ll = Globl.SplitByFirst(func, '.');
-                    if (libs.ContainsKey(ll[0]))
+                    if (slibs.ContainsKey(ll[0]))
+                    {
+                        Dictionary<string, List<string>> funcs = slibs[ll[0]][2] as Dictionary<string, List<string>>;
+                        Dictionary<string, List<string>> fancs = slibs[ll[0]][0] as Dictionary<string, List<string>>;
+                        Dictionary<string, List<string>> fincs = slibs[ll[0]][1] as Dictionary<string, List<string>>;
+                        if (fancs.ContainsKey(ll[1]))
+                        {
+                            List<string> cod = fancs[ll[1]];
+                            int index;
+                            bool intry = false;
+                            for (index = 0; index < cod.Count; index++)
+                            {
+                                try
+                                {
+                                    if (!cod[index].StartsWith("endif ") && cod[index] != "end" && !cod[index].StartsWith(":") && cod[index] != "catch")
+                                    {
+                                        if (cod[index] == "try")
+                                            intry = true;
+                                        else if (cod[index] == "catch" && intry)
+                                        {
+                                            intry = false;
+                                            int kk = Program.Search(index, "end");
+                                            if (kk != -1)
+                                            {
+                                                index = kk;
+                                            }
+                                        }
+                                        else if (cod[index].StartsWith("@"))
+                                        {
+                                            try
+                                            {
+                                                string[] sl = Globl.SplitByFirst(cod[index].Remove(0, 1), ' ');
+                                                Command.Do(sl[0], sl[1], index);
+                                            }
+                                            catch { }
+                                        }
+                                        else if (cod[index].StartsWith("!"))
+                                        {
+                                            try
+                                            {
+                                                string[] sl = Globl.SplitByFirst(cod[index].Remove(0, 1), ' ');
+                                                Command.Do(sl[0], sl[1], index);
+                                            }
+                                            catch (Exception e) { File.WriteAllText("exception", "Line::" + index + "\nText::" + cod[index] + "\nError::" + e.Message); }
+                                        }
+                                        else
+                                        {
+                                            string[] sl = Globl.SplitByFirst(cod[index], ' ');
+                                            Command.Do(sl[0], sl[1], index);
+                                        }
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    if (!intry)
+                                    {
+                                        Console.WriteLine("Line::" + index + "\nText::" + cod[index] + "\nError::" + e.Message); Console.ReadKey(true); Environment.Exit(0);
+                                    }
+                                    else
+                                    {
+                                        Program.ex = e;
+                                        int kk = Program.Search(index, "catch");
+                                        if (kk != -1)
+                                        {
+                                            index = kk;
+                                            intry = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else if (fincs.ContainsKey(ll[1]))
+                        {
+                            List<string> cod = fincs[ll[1]];
+                            string ag = cod[0];
+                            cod.RemoveAt(0);
+                            if (Program.vars.ContainsKey(arg))
+                            {
+                                if (Program.vars.ContainsKey(ag))
+                                    Program.vars[ag] = Program.vars[arg];
+                                else
+                                    Program.vars.Add(ag, Program.vars[arg]);
+                                int index;
+                                bool intry = false;
+                                for (index = 0; index < cod.Count; index++)
+                                {
+                                    try
+                                    {
+                                        if (!cod[index].StartsWith("endif ") && cod[index] != "end" && !cod[index].StartsWith(":") && cod[index] != "catch")
+                                        {
+                                            if (cod[index] == "try")
+                                                intry = true;
+                                            else if (cod[index] == "catch" && intry)
+                                            {
+                                                intry = false;
+                                                int kk = Program.Search(index, "end");
+                                                if (kk != -1)
+                                                {
+                                                    index = kk;
+                                                }
+                                            }
+                                            else if (cod[index].StartsWith("@"))
+                                            {
+                                                try
+                                                {
+                                                    string[] sl = Globl.SplitByFirst(cod[index].Remove(0, 1), ' ');
+                                                    Command.Do(sl[0], sl[1], index);
+                                                }
+                                                catch { }
+                                            }
+                                            else if (cod[index].StartsWith("!"))
+                                            {
+                                                try
+                                                {
+                                                    string[] sl = Globl.SplitByFirst(cod[index].Remove(0, 1), ' ');
+                                                    Command.Do(sl[0], sl[1], index);
+                                                }
+                                                catch (Exception e) { File.WriteAllText("exception", "Line::" + index + "\nText::" + cod[index] + "\nError::" + e.Message); }
+                                            }
+                                            else
+                                            {
+                                                string[] sl = Globl.SplitByFirst(cod[index], ' ');
+                                                Command.Do(sl[0], sl[1], index);
+                                            }
+                                        }
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        if (!intry)
+                                        {
+                                            Console.WriteLine("Line::" + index + "\nText::" + cod[index] + "\nError::" + e.Message); Console.ReadKey(true); Environment.Exit(0);
+                                        }
+                                        else
+                                        {
+                                            Program.ex = e;
+                                            int kk = Program.Search(index, "catch");
+                                            if (kk != -1)
+                                            {
+                                                index = kk;
+                                                intry = false;
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+                            else
+                                throw new Exception("Not found variable " + arg);
+                        }
+                        else if (funcs.ContainsKey(ll[1]))
+                        {
+                            List<string> cod = funcs[ll[1]];
+                            string ag = cod[0];
+                            cod.RemoveAt(0);
+                            if (Program.arrs.ContainsKey(arg))
+                            {
+                                if (Program.arrs.ContainsKey(ag))
+                                    Program.arrs[ag] = Program.arrs[arg];
+                                else
+                                    Program.arrs.Add(ag, Program.arrs[arg]);
+                                int index;
+                                bool intry = false;
+                                for (index = 0; index < cod.Count; index++)
+                                {
+                                    try
+                                    {
+                                        if (!cod[index].StartsWith("endif ") && cod[index] != "end" && !cod[index].StartsWith(":") && cod[index] != "catch")
+                                        {
+                                            if (cod[index] == "try")
+                                                intry = true;
+                                            else if (cod[index] == "catch" && intry)
+                                            {
+                                                intry = false;
+                                                int kk = Program.Search(index, "end");
+                                                if (kk != -1)
+                                                {
+                                                    index = kk;
+                                                }
+                                            }
+                                            else if (cod[index].StartsWith("@"))
+                                            {
+                                                try
+                                                {
+                                                    string[] sl = Globl.SplitByFirst(cod[index].Remove(0, 1), ' ');
+                                                    Command.Do(sl[0], sl[1], index);
+                                                }
+                                                catch { }
+                                            }
+                                            else if (cod[index].StartsWith("!"))
+                                            {
+                                                try
+                                                {
+                                                    string[] sl = Globl.SplitByFirst(cod[index].Remove(0, 1), ' ');
+                                                    Command.Do(sl[0], sl[1], index);
+                                                }
+                                                catch (Exception e) { File.WriteAllText("exception", "Line::" + index + "\nText::" + cod[index] + "\nError::" + e.Message); }
+                                            }
+                                            else
+                                            {
+                                                string[] sl = Globl.SplitByFirst(cod[index], ' ');
+                                                Command.Do(sl[0], sl[1], index);
+                                            }
+                                        }
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        if (!intry)
+                                        {
+                                            Console.WriteLine("Line::" + index + "\nText::" + cod[index] + "\nError::" + e.Message); Console.ReadKey(true); Environment.Exit(0);
+                                        }
+                                        else
+                                        {
+                                            Program.ex = e;
+                                            int kk = Program.Search(index, "catch");
+                                            if (kk != -1)
+                                            {
+                                                index = kk;
+                                                intry = false;
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+                            else
+                                throw new Exception("Not found array " + arg);
+                        }
+                    }
+                    else if (libs.ContainsKey(ll[0]))
                     {
                         object[] objs = libs[ll[0]];
                         object[] args =
                         {
                                     ll[1],
                                     arg,
-                                    Program.fil,
-                                    Program.cod,
-                                    Program.vars,
-                                    Program.arrs,
-                                    Program.index,
-                                    Globl.Version + "." + Globl.SubVersion + "." + Globl.Build
+                                    new object[]
+                                    {
+                                        Program.fil,
+                                        Program.cod,
+                                        Program.vars,
+                                        Program.arrs,
+                                        indx,
+                                        Globl.Version + "." + Globl.SubVersion + "." + Globl.Build
+                                    }
                                 };
                         Object o = objs[0];
                         MethodInfo mi = (MethodInfo)objs[1];
