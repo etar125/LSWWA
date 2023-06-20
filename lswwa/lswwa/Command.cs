@@ -402,7 +402,7 @@ namespace lswwa
                 int index = int.Parse(Globl.ConvertS(splt2[0]));
                 string var = splt2[1];
                 if (Program.arrs.ContainsKey(arr))
-                    Program.arrs[arr][index] = Globl.ConvertS(arg);
+                    Program.arrs[arr][index] = Globl.ConvertS(var);
                 else
                     throw new Exception("Not found array " + arr);
             }
