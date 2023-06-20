@@ -387,6 +387,20 @@ namespace lswwa
                 else
                     throw new Exception("Not found array " + splt[0]);
             }
+            else if (func == "del")
+            {
+                if (Program.vars.ContainsKey(arg))
+                    Program.vars.Remove(arg);
+                else
+                    throw new Exception("Not found variable " + arg);
+            }
+            else if (func == "adel")
+            {
+                if (Program.arrs.ContainsKey(arg))
+                    Program.arrs.Remove(arg);
+                else
+                    throw new Exception("Not found array " + arg);
+            }
             else if (func == "clr")
             {
                 if (Program.arrs.ContainsKey(arg))
